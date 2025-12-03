@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { NodeCard } from './components/NodeCard';
 import { ConnectionLines } from './components/ConnectionLines';
@@ -104,6 +105,21 @@ const App: React.FC = () => {
 
   // --- App State ---
   const [activeTab, setActiveTab] = useState<'flow' | 'singer' | 'credits'>('flow');
+  
+  // Custom API Key State
+  const [customApiKey, setCustomApiKey] = useState('');
+
+  useEffect(() => {
+    // Load API Key from local storage on mount
+    const savedKey = localStorage.getItem('vizualz_api_key');
+    if (savedKey) setCustomApiKey(savedKey);
+  }, []);
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setCustomApiKey(newKey);
+    localStorage.setItem('vizualz_api_key', newKey);
+  };
   
   // Studio Flow State
   const [personImage, setPersonImage] = useState<ImageState>({ file: null, previewUrl: null, base64: null });
@@ -262,7 +278,8 @@ const App: React.FC = () => {
     setShowExtendedFlow(false);
 
     try {
-      const generatedImage = await generateOutfitSwap(personImage.base64, clothingImage.base64);
+      // Pass customApiKey
+      const generatedImage = await generateOutfitSwap(personImage.base64, clothingImage.base64, customApiKey);
       deductCredits(COST_BASE_SWAP); 
       setResultImage(generatedImage);
       setStatus(ProcessingStatus.SUCCESS);
@@ -289,7 +306,8 @@ const App: React.FC = () => {
     try {
         const generatedFlyer = await generateSingerSwap(
             flyerRefImage.base64, 
-            singerImage.base64
+            singerImage.base64,
+            customApiKey
         );
         deductCredits(COST_BASE_SWAP);
         setFlyerBaseResult(generatedFlyer);
@@ -318,7 +336,8 @@ const App: React.FC = () => {
               eventDetails,
               eventFontSize,
               eventFontColor,
-              eventFontFamily
+              eventFontFamily,
+              customApiKey
           );
           deductCredits(COST_TEXT_EDIT);
           setFlyerFinalResult(finishedFlyer);
@@ -337,7 +356,7 @@ const App: React.FC = () => {
       setStatus(ProcessingStatus.REFINING);
       setFinalResultImage(null); 
       try {
-          const refined = await refineImage(resultImage, option.prompt);
+          const refined = await refineImage(resultImage, option.prompt, customApiKey);
           deductCredits(COST_VARIATION);
           setFinalResultImage(refined);
           setStatus(ProcessingStatus.SUCCESS);
@@ -353,7 +372,7 @@ const App: React.FC = () => {
       setStatus(ProcessingStatus.GENERATING_POSE);
       setPoseResultImage(null);
       try {
-          const generatedPose = await generatePoseVariation(resultImage, option.prompt);
+          const generatedPose = await generatePoseVariation(resultImage, option.prompt, customApiKey);
           deductCredits(COST_VARIATION);
           setPoseResultImage(generatedPose);
           setStatus(ProcessingStatus.SUCCESS);
@@ -369,7 +388,7 @@ const App: React.FC = () => {
     setStatus(ProcessingStatus.GENERATING_HAIR);
     setHairResultImage(null);
     try {
-        const generatedHair = await generateHairVariation(resultImage, option.prompt);
+        const generatedHair = await generateHairVariation(resultImage, option.prompt, customApiKey);
         deductCredits(COST_VARIATION);
         setHairResultImage(generatedHair);
         setStatus(ProcessingStatus.SUCCESS);
@@ -385,7 +404,7 @@ const App: React.FC = () => {
       setStatus(ProcessingStatus.GENERATING_SINGER_VAR);
       setSingerVariationResultImage(null);
       try {
-          const generatedVar = await generateSingerVariation(flyerFinalResult, option.prompt);
+          const generatedVar = await generateSingerVariation(flyerFinalResult, option.prompt, customApiKey);
           deductCredits(COST_VARIATION);
           setSingerVariationResultImage(generatedVar);
           setStatus(ProcessingStatus.SUCCESS);
@@ -736,6 +755,30 @@ const App: React.FC = () => {
                               </div>
                           </div>
                       </div>
+                      
+                      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <h2 className="text-xl font-bold text-slate-300 mb-4">Configurações</h2>
+                        <div className="space-y-2">
+                            <label className="text-xs text-slate-400 font-bold flex items-center gap-2">
+                                GEMINI API KEY (Opcional)
+                                <span className="relative group cursor-help">
+                                    <svg className="w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-black text-white text-[10px] p-2 rounded hidden group-hover:block z-50 text-center">
+                                        Use sua própria chave do Google AI Studio para não depender da cota global.
+                                    </span>
+                                </span>
+                            </label>
+                            <input
+                                type="password"
+                                value={customApiKey}
+                                onChange={handleApiKeyChange}
+                                placeholder="Cole sua chave aqui (AI Studio)"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                            />
+                            <p className="text-[10px] text-slate-500">Se deixado em branco, a chave do sistema será usada.</p>
+                        </div>
+                      </div>
+
                       <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
                           <h3 className="font-bold text-white mb-4">Tabela de Custos</h3>
                           <ul className="space-y-3">

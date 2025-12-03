@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 
 // Helper to remove the data URL prefix for the API
@@ -15,10 +16,11 @@ const MODEL_ID = 'gemini-2.5-flash-image';
 
 export const generateOutfitSwap = async (
   personImageBase64: string,
-  clothingImageBase64: string
+  clothingImageBase64: string,
+  apiKey?: string
 ): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
 
     const personMime = getMimeType(personImageBase64);
     const clothingMime = getMimeType(clothingImageBase64);
@@ -67,10 +69,11 @@ export const generateOutfitSwap = async (
 
 export const refineImage = async (
   baseImageBase64: string,
-  instruction: string
+  instruction: string,
+  apiKey?: string
 ): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
     const mimeType = getMimeType(baseImageBase64);
 
     const response = await ai.models.generateContent({
@@ -107,10 +110,11 @@ export const refineImage = async (
 
 export const generatePoseVariation = async (
     baseImageBase64: string,
-    poseDescription: string
+    poseDescription: string,
+    apiKey?: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
         const mimeType = getMimeType(baseImageBase64);
 
         const response = await ai.models.generateContent({
@@ -148,10 +152,11 @@ export const generatePoseVariation = async (
 
 export const generateHairVariation = async (
     baseImageBase64: string,
-    hairDescription: string
+    hairDescription: string,
+    apiKey?: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
         const mimeType = getMimeType(baseImageBase64);
 
         const response = await ai.models.generateContent({
@@ -190,10 +195,11 @@ export const generateHairVariation = async (
 // STEP 1: Swap the Singer Only
 export const generateSingerSwap = async (
     flyerRefBase64: string,
-    singerBase64: string
+    singerBase64: string,
+    apiKey?: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
         const flyerMime = getMimeType(flyerRefBase64);
         const singerMime = getMimeType(singerBase64);
 
@@ -258,10 +264,11 @@ export const applyFlyerText = async (
     eventDetails: string,
     fontSize: string,
     fontColor: string,
-    fontFamily: string
+    fontFamily: string,
+    apiKey?: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
         const flyerMime = getMimeType(flyerBase64);
 
         // Enhance the user's color selection with instructions to maintain contrast
@@ -328,10 +335,11 @@ Retorne apenas o flyer finalizado com o texto aplicado.`
 
 export const generateSingerVariation = async (
     flyerBase64: string,
-    variationPrompt: string
+    variationPrompt: string,
+    apiKey?: string
 ): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY });
         const mimeType = getMimeType(flyerBase64);
 
         const response = await ai.models.generateContent({
