@@ -30,7 +30,17 @@ export const generateOutfitSwap = async (
       contents: {
         parts: [
           {
-            text: "Atue como um especialista sênior em retoque digital e IA de moda (Virtual Try-On). Sua tarefa é realizar uma SUBSTITUIÇÃO TOTAL de vestuário.\n\nINSTRUÇÕES RIGOROSAS:\n1. APAGUE COMPLETAMENTE a roupa que a pessoa está vestindo na primeira imagem. Ignore a textura, cor e estampa da roupa antiga.\n2. VISTA a pessoa com a roupa fornecida na segunda imagem. A nova roupa deve ser opaca e cobrir totalmente a área do corpo correspondente.\n3. PROIBIDO: Não faça fusão (blending) entre a roupa antiga e a nova. Não deixe a roupa antiga 'vazar' ou aparecer por baixo. O resultado deve parecer que a pessoa vestiu apenas a nova peça.\n4. RECONSTRUÇÃO DE PELE: Se a nova roupa for mais curta, decotada ou sem mangas em comparação com a original, você DEVE reconstruir a pele visível (inpainting) com textura e tom de pele realistas e anatomicamente corretos.\n5. PRESERVE RIGOROSAMENTE: O rosto (identidade), cabelo, mãos, acessórios (relógios, anéis), pose exata e todo o cenário de fundo. A iluminação na nova roupa deve corresponder à iluminação da cena.\n\nGere apenas a imagem final realista em alta qualidade."
+            text: `Atue como um especialista em COMPOSIÇÃO DE IMAGEM e RETOQUE DE MODA (Virtual Try-On).
+Sua missão é vestir a pessoa da Imagem 1 com a roupa exata da Imagem 2.
+
+REGRAS DE OURO (FIDELIDADE MÁXIMA AO PRODUTO):
+1. CLONAGEM TÊXTIL: A roupa da Imagem 2 (Roupa Nova) deve ser transferida para o corpo da pessoa. Você PROIBIDO de alterar a estampa, a cor, a textura ou o design da roupa nova. Ela deve parecer IDÊNTICA à foto do produto enviada.
+2. ADAPTAÇÃO FÍSICA (WARPING): Ajuste a roupa nova apenas geometricamente para envolver o corpo da pessoa e respeitar a pose. Imagine que você está deformando o tecido real sobre o corpo, não desenhando uma roupa nova.
+3. ILUMINAÇÃO: Aplique as sombras e luzes da cena da Imagem 1 sobre a roupa, mas sem alterar a cor base do tecido.
+4. REMOÇÃO: Remova completamente a roupa antiga. Não deixe nada da roupa original aparecer (golas antigas, mangas antigas).
+5. RECONSTRUÇÃO: Se a roupa nova for mais curta ou decotada, reconstrua a pele da pessoa de forma realista e anatomicamente correta.
+
+Resumo: Mantenha a pessoa. Mantenha a roupa nova exata. Apenas junte as duas imagens com realismo fotográfico.`
           },
           {
             inlineData: {
@@ -61,9 +71,9 @@ export const generateOutfitSwap = async (
 
     throw new Error("A IA não retornou uma imagem válida.");
 
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    handleGeminiError(error);
+    throw error; // Re-throw para o componente tratar se necessário
   }
 };
 
@@ -102,8 +112,8 @@ export const refineImage = async (
       }
     }
     throw new Error("Falha ao gerar a edição.");
-  } catch (error) {
-    console.error("Gemini Refine Error:", error);
+  } catch (error: any) {
+    handleGeminiError(error);
     throw error;
   }
 };
@@ -144,8 +154,8 @@ export const generatePoseVariation = async (
         }
         throw new Error("Falha ao gerar a variação de pose.");
 
-    } catch (error) {
-        console.error("Gemini Pose Error:", error);
+    } catch (error: any) {
+        handleGeminiError(error);
         throw error;
     }
 };
@@ -186,8 +196,8 @@ export const generateHairVariation = async (
         }
         throw new Error("Falha ao gerar o corte de cabelo.");
 
-    } catch (error) {
-        console.error("Gemini Hair Error:", error);
+    } catch (error: any) {
+        handleGeminiError(error);
         throw error;
     }
 };
@@ -252,8 +262,8 @@ Retorne o flyer finalizado.`
             }
         }
         throw new Error("Falha ao trocar o cantor.");
-    } catch (error) {
-        console.error("Gemini Singer Swap Error:", error);
+    } catch (error: any) {
+        handleGeminiError(error);
         throw error;
     }
 };
@@ -327,8 +337,8 @@ Retorne apenas o flyer finalizado com o texto aplicado.`
             }
         }
         throw new Error("Falha ao aplicar o texto.");
-    } catch (error) {
-        console.error("Gemini Text Apply Error:", error);
+    } catch (error: any) {
+        handleGeminiError(error);
         throw error;
     }
 };
@@ -377,8 +387,25 @@ Retorne apenas o flyer com o novo cantor.`
         }
         throw new Error("Falha ao gerar a variação de cantor.");
 
-    } catch (error) {
-        console.error("Gemini Singer Variation Error:", error);
+    } catch (error: any) {
+        handleGeminiError(error);
         throw error;
     }
+};
+
+// --- Error Handler ---
+
+const handleGeminiError = (error: any) => {
+    console.error("Gemini API Error:", error);
+    
+    // Check for 429 Resource Exhausted (Quota limit)
+    if (error.message && (error.message.includes('429') || error.message.includes('Resource has been exhausted') || error.message.includes('quota'))) {
+        throw new Error("⚠️ COTA DA API EXCEDIDA.\n\nA chave gratuita atingiu o limite. Vá em 'Carteira' e insira sua própria API Key para continuar.");
+    }
+
+    if (error.message && error.message.includes('API_KEY')) {
+         throw new Error("⚠️ API KEY INVÁLIDA.\n\nVerifique se configurou sua chave corretamente na aba 'Carteira'.");
+    }
+
+    throw new Error("Ocorreu um erro ao processar a imagem. Tente novamente.");
 };
