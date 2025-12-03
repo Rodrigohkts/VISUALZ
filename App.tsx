@@ -15,6 +15,7 @@ const STYLE_OPTIONS: ControlOption[] = [
     { id: 'bg_studio', label: 'Fundo: Estúdio', prompt: 'substitua o fundo por um estúdio fotográfico minimalista profissional' },
     { id: 'bg_street', label: 'Fundo: Rua Urbana', prompt: 'substitua o fundo por uma rua urbana moderna e desfocada (bokeh)' },
     { id: 'bg_beach', label: 'Fundo: Praia', prompt: 'substitua o fundo por uma praia paradisíaca ensolarada' },
+    { id: 'bg_christmas', label: 'Fundo: Natal', prompt: 'substitua o fundo por um cenário natalino mágico e sofisticado, com árvore de natal iluminada ao fundo, luzes douradas e clima aconchegante' },
     { id: 'bg_cyber', label: 'Estilo: Cyberpunk', prompt: 'adicione uma atmosfera cyberpunk neon futurista ao ambiente' },
     { id: 'light_sunset', label: 'Luz: Pôr do Sol', prompt: 'altere a iluminação para a hora dourada do pôr do sol' },
     { id: 'style_vintage', label: 'Filtro: Vintage', prompt: 'aplique uma estética de fotografia de filme vintage anos 90' },
